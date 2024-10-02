@@ -1,12 +1,16 @@
 const express = require("express");
 const router = express.Router();
 
-const {body, validateResult} = require("express-validator");
+const {body, validationResult} = require("express-validator");
+const conn = require("../mariadb");
+const {StatusCodes} = require("http-status-codes");
+
+const {join, login, putReset, postReset} = require("../controller/UserController")
 
 router.use(express.json());
 
 const validate = (req, res, next) => {
-    const err = validateResult(req);
+    const err = validationResult(req);
 
     return err.isEmpty() ? next() : res.status(400).json(err.array());
 }
@@ -18,11 +22,8 @@ router.post("/join",
         body("password").notEmpty().isString(),
         validate
     ],
-    (req, res) => {
-    res.json({
-        message : "join"
-    })
-})
+    join
+)
 
 // 로그인
 router.post("/login",
@@ -31,11 +32,8 @@ router.post("/login",
         body("password").notEmpty().isString(),
         validate
     ],
-    (req, res) => {
-    res.json({
-        message : "login"
-    })
-})
+    login
+)
 
 // 비밀번호 초기화 요청
 router.post("/reset",
@@ -43,23 +41,18 @@ router.post("/reset",
         body("email").notEmpty().isEmail(),
         validate
     ],
-    (req, res) => {
-    res.json({
-        message : "reset"
-    })
-})
+    postReset
+)
 
 // 비밀번호 초기화
 router.put("/reset",
     [
+        body("email").notEmpty().isEmail(),
         body("password").notEmpty().isString(),
         validate
     ],
-    (req, res) => {
-    res.json({
-        message : "resset"
-    })
-})
+    putReset
+)
 
 
 module.exports = router;
