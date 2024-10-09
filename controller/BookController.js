@@ -43,11 +43,18 @@ const allBooks = (req, res) => {
 
 const bookDetail = (req, res) => {
     let {bookId} = req.params;
+    let {userId} = req.body;
 
     bookId = parseInt(bookId);
 
-    const sql = `SELECT * FROM books LEFT JOIN category ON books.category_id = category.id WHERE books.id = ?`
-    const value = [bookId];
+    const sql = `SELECT *,
+                    (SELECT EXISTS (SELECT * FROM likes WHERE user_id = ? AND liked_book_id = ?)) AS liked
+                FROM books
+                LEFT JOIN category
+                ON books.category_id = category.category_id
+                WHERE books.id = ?`
+
+    const value = [userId, bookId, bookId];
 
     conn.query(
         sql,
