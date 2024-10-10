@@ -3,7 +3,7 @@ const router = express.Router();
 
 const {body, param, validationResult} = require("express-validator")
 
-
+const {addToCart, getCartItems, removeCartItems} = require("../controller/CartController");
 
 router.use(express.json());
 
@@ -15,30 +15,19 @@ const validate = (req, res, next) => {
 
 router
     .route("/")
-    .post(
-        [
-            body(["bookId", "count"]).notEmpty().isInt(),
-            validate
-        ],
-        (req, res) => {
-            const {bookId, count} = req.body;
-    })
     .get(
-        [],
-        (req, res) => [
-
-    ])
+        getCartItems
+    )
+    .post(
+        addToCart
+    )
 
 router
-    .delete("/:bookId",
-        [
-            param("bookId").notEmpty().isInt(),
-            validate
-        ],
-        (req, res) => {
-        const {bookId} = req.params;
-    })
+    .delete("/:id",
+        removeCartItems
+    )
 
 // 4. 주문 "예상" 상품 목록 조회 도 해야함.
+router.get("/")
 
 module.exports = router;
