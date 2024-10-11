@@ -10,13 +10,13 @@ const addToCart = (req, res) => {
     conn.query(
         sql,
         values,
-        (err, results) => {
+        (err, results, fields) => {
             if(err) {
                 console.log(err);
                 return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
             }
 
-             return res.status(StatusCodes.OK).json(results);
+            return res.status(StatusCodes.OK).json(results);
         }
     )
 }
