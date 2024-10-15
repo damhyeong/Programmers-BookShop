@@ -350,16 +350,14 @@
 ```text
 [
     {
-        order_id : 주문 id,
+        id : 주문 id,
         created_at : "주문일자",
-        delivery : {
-            address : "주소",
-            receiver : "이름",
-            contact : "010-0000-0000"
-        },
-        bookTitle : "대표 책 제목",
-        totalPrice : 결제 금액,
-        totalCount : 총 수량 
+        address : "주소",
+        receiver : "이름",
+        contact : "010-0000-0000"
+        book_title : "대표 책 제목",
+        total_quantity : 총 수량,
+        total_price : 결제 금액
     }
 ]
 ```
@@ -377,18 +375,18 @@
 ```text
 [
     {
-        bookId : 도서 id,
-        bookTitle : "도서 제목",
+        book_id : 도서 id,
+        title : "도서 제목",
         author : "작가명",
         price : 가격,
-        count : 수량
+        quantity : 수량
     },
     {
-        bookId : 도서 id,
-        bookTitle : "도서 제목",
+        book_id : 도서 id,
+        title : "도서 제목",
         author : "작가명",
         price : 가격,
-        count : 수량
+        quantity : 수량
     }, 
     ...
 ]

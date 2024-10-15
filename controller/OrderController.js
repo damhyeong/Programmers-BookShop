@@ -22,8 +22,6 @@ const addOrder = async (req, res) => {
         console.log(err);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
     }
-    console.log("delivery_id : "  + delivery_id)
-
 
     sql = `INSERT INTO orders (book_title, total_quantity, total_price, user_id, delivery_id) VALUES (?, ?, ?, ?, ?)`;
     values = [firstBookTitle, totalQuantity, totalPrice, userId, delivery_id];
@@ -41,35 +39,81 @@ const addOrder = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
     }
 
+
+    items;
+
+    sql = "SELECT * FROM cartItems WHERE id IN (?)"
+
+    let [results] = await conn.query(
+        sql,
+        [items]
+    );
+
     sql = "INSERT INTO orderedBook (order_id, book_id, quantity) VALUES ?";
     values = [];
 
-    items.forEach((value, index) => {
-        values.push([order_id, value["book_id"], value["quantity"]])
+    results.forEach((cartItem) => {
+        values.push([ order_id, cartItem["book_id"], cartItem["quantity"] ]);
     })
 
     try{
-        const [results] = await conn.query(
+        [results] = await conn.query(
             sql,
             [values]
         );
-
-        return res.status(StatusCodes.OK).json(results);
     } catch (err) {
         console.log(err);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
     }
 
+    console.log(items);
 
-    await conn.end();
+    results = await deleteCartItems(items, conn);
+
+    return res.status(StatusCodes.OK).json(results);
 }
 
-const getOrders = (req, res) => {
+const deleteCartItems = async (cartIds, conn) => {
+    let sql = `DELETE FROM cartItems WHERE id IN (?)`;
+    let values = cartIds;
+
+    const result = await conn.query(sql, [values]);
+    return result;
+}
+
+const getOrders = async (req, res) => {
+    const conn = await connection();
+
+    let sql = `
+        SELECT orders.id, created_at, address, receiver, contact, book_title, total_quantity, total_price
+        FROM orders
+        LEFT JOIN delivery
+        ON orders.delivery_id = delivery.id
+    `;
+
+    let [rows, fields] = await conn.query(sql);
+    return res.status(StatusCodes.OK).json(rows);
 
 }
 
-const getOrderDetail = (req, res) => {
+const getOrderDetail = async (req, res) => {
+    const {id} = req.params;
 
+    const conn = await connection();
+
+    let sql = `
+        SELECT book_id, title, author, price, quantity
+        FROM orderedBook LEFT JOIN books
+            ON orderedBook.book_id = books.id
+        WHERE order_id = ?
+    `;
+
+    let [rows, fields] = await conn.query(
+        sql,
+        id
+    )
+
+    return res.status(StatusCodes.OK).json(rows);
 }
 
 module.exports = {addOrder, getOrders, getOrderDetail};
