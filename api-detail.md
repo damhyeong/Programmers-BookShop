@@ -173,7 +173,7 @@
 
 `POST /likes/{bookId}` - status 200
 
-**Request** : 없음
+**Request Header** : "Authorization" : login jwt
 
 **Response** : 없음
 
@@ -186,7 +186,7 @@
 
 `DELETE /likes/{bookId}` - status 200
 
-**Request** : 없음
+**Request Header** : "Authorization" : login jwt
 
 **Response** : 없음
 
@@ -200,7 +200,9 @@
 
 `POST /carts` - status 201
 
-**Request** :
+**Request Headers** : "Authorization" = login jwt
+
+**Request Body** :
 
 ```text
 {
@@ -209,6 +211,10 @@
     user_id : 유저 id
 }
 ```
+
+
+
+<br/>
 
 **Response** : 없음
 

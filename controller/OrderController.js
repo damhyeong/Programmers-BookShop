@@ -16,8 +16,8 @@ const addOrder = async (req, res) => {
         const [results] = await conn.query(
             sql,
             values
-        )
-        delivery_id = results.insertId
+        );
+        delivery_id = results.insertId;
     } catch (err) {
         console.log(err);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
@@ -40,8 +40,6 @@ const addOrder = async (req, res) => {
     }
 
 
-    items;
-
     sql = "SELECT * FROM cartItems WHERE id IN (?)"
 
     let [results] = await conn.query(
@@ -54,7 +52,7 @@ const addOrder = async (req, res) => {
 
     results.forEach((cartItem) => {
         values.push([ order_id, cartItem["book_id"], cartItem["quantity"] ]);
-    })
+    });
 
     try{
         [results] = await conn.query(
@@ -75,9 +73,8 @@ const addOrder = async (req, res) => {
 
 const deleteCartItems = async (cartIds, conn) => {
     let sql = `DELETE FROM cartItems WHERE id IN (?)`;
-    let values = cartIds;
 
-    const result = await conn.query(sql, [values]);
+    const result = await conn.query(sql, [cartIds]);
     return result;
 }
 

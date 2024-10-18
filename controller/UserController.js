@@ -1,4 +1,4 @@
-const conn = require("../mariadb");
+const connection = require("../mariadb");
 const {StatusCodes} = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 
@@ -32,55 +32,59 @@ const join = (req, res) => {
     )
 }
 
-const login = (req, res) => {
+const login = async (req, res) => {
+    const conn = await connection();
+
     const {email, password} = req.body;
 
     const sql = `SELECT * FROM users WHERE email = ?`;
     const value = [email];
 
-    conn.query(
-        sql,
-        value,
-        (err, results) => {
-            if(err){
-                console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
+    let results, fields;
 
-            const loginUser = results[0];
+    try{
+        [results, fields] = await conn.query(
+            sql,
+            value,
 
-            if(!loginUser){
-                console.log("해당 유저를 찾을 수 없음.");
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
+        )
+    } catch (err) {
+        console.log(err);
+        return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+    const loginUser = results[0];
 
-            const salt = loginUser.salt;
-            const hashPassword = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("base64");
+    if(!loginUser){
+        console.log("해당 유저를 찾을 수 없음.");
+        return res.status(StatusCodes.BAD_REQUEST).end();
+    }
 
-            console.log(password);
-            console.log(hashPassword);
-            console.log(loginUser.password);
+    const salt = loginUser.salt;
+    const hashPassword = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("base64");
 
-            if(loginUser && loginUser.password === hashPassword){
-                const token = jwt.sign({
-                    email : loginUser.email
-                }, process.env.PRIVATE_KEY, {
-                    expiresIn: "5m",
-                    issuer : "damsoon"
-                });
+    console.log(password);
+    console.log(hashPassword);
+    console.log(loginUser.password);
 
-                res.cookie("token", token, {
-                    httpOnly : true
-                });
+    if(loginUser && loginUser.password === hashPassword){
+        const token = jwt.sign({
+            id : loginUser.id,
+            email : loginUser.email
+        }, process.env.PRIVATE_KEY, {
+            expiresIn: "5m",
+            issuer : "damsoon"
+        });
 
-                console.log(token);
+        res.cookie("token", token, {
+            httpOnly : true
+        });
 
-                return res.status(StatusCodes.OK).json(results);
-            } else {
-                return res.status(StatusCodes.UNAUTHORIZED).end();
-            }
-        }
-    )
+        console.log(token);
+
+        return res.status(StatusCodes.OK).json(results);
+    } else {
+        return res.status(StatusCodes.UNAUTHORIZED).end();
+    }
 }
 
 const postReset = (req, res) => {
