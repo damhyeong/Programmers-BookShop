@@ -124,7 +124,7 @@
     index : "목차",
     price : 가격,
     likes : 좋아요 수,
-    liked : boolean,
+    liked : boolean, - 로그인 상태에서만 보내짐.
     pubDate : "출간일"
 }
 ```
@@ -224,7 +224,7 @@
 
 `GET /carts` - status 200
 
-**Request** : 없음
+**Request Headers** : Authorization : JWT token 
 
 **Response** :
 
@@ -311,6 +311,8 @@
 
 `POST /orders` - status 200
 
+**Request Headers** : Authorization - JWT (user_id);
+
 **Request** :
 
 ```text
@@ -335,7 +337,6 @@
     },
     totalPrice : 총 금액,
     totalQuantity : 총 개수,
-    userId : 유저 id - 나중에 jwt 파싱되어 꺼내져야 함,
     firstBookTitle : "대표 책 타이틀 "
 }
 ```
@@ -349,6 +350,8 @@
 `GET /orders` - status 200
 
 **Request** :
+
+**Request Headers** : Authorization - JWT (user_id);
 
 
 **Response** :

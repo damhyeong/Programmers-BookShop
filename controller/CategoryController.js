@@ -1,26 +1,17 @@
-const conn = require("../mariadb");
+const connection = require("../mariadb");
 
 const {StatusCodes} = require("http-status-codes");
 
-const allCategory = (req, res) => {
+const allCategory = async (req, res) => {
+    const conn = await connection();
 
     const sql = `SELECT * FROM category`;
 
-    conn.query(
+    let [result] = await conn.query(
         sql,
-        (err, results) => {
-            if(err){
-                console.log(err);
-                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
-            }
-
-            if(results){
-                return res.status(StatusCodes.OK).json(results);
-            } else {
-                return res.status(StatusCodes.NOT_FOUND).end();
-            }
-        }
     )
+
+    return res.status(StatusCodes.OK).json(result);
 }
 
 module.exports = {allCategory};

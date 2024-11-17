@@ -1,5 +1,14 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
+
+
+const corsOptions = {
+    origin : ["http://localhost:3000"],
+    credentials : true,
+}
+
+app.use(cors(corsOptions));
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -19,4 +28,5 @@ app.use("/books", bookRouter);
 app.use("/category", categoryRouter);
 app.use("/carts", cartRouter);
 app.use("/likes", likeRouter);
+
 

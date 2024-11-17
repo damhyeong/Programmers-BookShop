@@ -1,16 +1,14 @@
+const ensureAuthorization = require("../auth");
 const connection = require("../mariadb");
 const {StatusCodes} = require("http-status-codes");
 
-const dotenv = require("dotenv");
-dotenv.config();
 
 const jwt = require("jsonwebtoken");
-const {TokenExpiredError} = require("jsonwebtoken");
 
 const addToCart = async (req, res) => {
     const conn = await connection();
 
-    const jwtPayload = getJwtPayload(req, res);
+    const jwtPayload = ensureAuthorization(req, res);
 
     if(jwtPayload instanceof jwt.TokenExpiredError) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -46,7 +44,7 @@ const addToCart = async (req, res) => {
 const getCartItems = async (req, res) => {
     const conn = await connection();
 
-    const jwtPayload = getJwtPayload(req, res);
+    const jwtPayload = ensureAuthorization(req, res);
 
     if(jwtPayload instanceof jwt.TokenExpiredError) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -103,6 +101,19 @@ const getCartItems = async (req, res) => {
 const removeCartItems = async (req, res) => {
     const conn = await connection();
 
+    const jwtPayload = ensureAuthorization(req, res);
+
+    if(jwtPayload instanceof jwt.TokenExpiredError) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+            message: "로그인 jwt 토큰 세션이 만료됨. 다시 로그인 해 주세미."
+        });
+    } else if (jwtPayload instanceof jwt.JsonWebTokenError) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+            message : "해당 토큰은 형식에 맞지 않거나, 검증되지 않는 토큰입니다."
+        })
+    }
+
+
     let {id} = req.params;
 
     id = parseInt(id);
@@ -128,21 +139,5 @@ const removeCartItems = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
     }
 }
-
-const getJwtPayload = (req, res) => {
-    try{
-        const receivedJwt = req.headers["authorization"];
-
-        const jwtPayload = jwt.verify(receivedJwt, process.env.PRIVATE_KEY);
-
-        return jwtPayload;
-    } catch (err) {
-        console.log(err.name);
-        console.log(err.message);
-
-        return err;
-    }
-}
-
 
 module.exports = {addToCart, getCartItems, removeCartItems};

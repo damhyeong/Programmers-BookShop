@@ -1,16 +1,14 @@
+const ensureAuthorization = require("../auth")
 const jwt = require("jsonwebtoken");
 const connection = require("../mariadb");
 const {StatusCodes} = require("http-status-codes");
-
-const dotenv = require("dotenv");
-dotenv.config();
 
 const addLike = async (req, res) => {
     const conn = await connection();
 
     const {bookId} = req.params;
 
-    const decodedJwt = getJwtPayload(req);
+    const decodedJwt = ensureAuthorization(req, res);
 
     if(decodedJwt instanceof jwt.TokenExpiredError) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -43,14 +41,12 @@ const addLike = async (req, res) => {
     }
 }
 
-
 const removeLike = async (req, res) => {
     const conn = await connection();
 
     const {bookId} = req.params;
 
-    const decodedJwt = getJwtPayload(req);
-    console.log(decodedJwt);
+    const decodedJwt = ensureAuthorization(req, res);
 
     if(decodedJwt instanceof jwt.TokenExpiredError) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -78,22 +74,5 @@ const removeLike = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
     }
 }
-
-const getJwtPayload = (req, res) => {
-    try{
-        const receivedJwt = req.headers["authorization"];
-
-        const jwtPayload = jwt.verify(receivedJwt, process.env.PRIVATE_KEY);
-
-        return jwtPayload;
-    } catch (err) {
-        console.log(err.name);
-        console.log(err.message);
-
-        return err;
-    }
-}
-
-
 
 module.exports = {addLike, removeLike};
