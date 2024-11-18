@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const allBooks = async (req, res) => {
     const conn = await connection()
 
-    let {categoryId, news, limit, currentPage} = req.query;
+    let {category_id, news, limit, currentPage} = req.query;
 
     const offset = parseInt(limit) * (parseInt(currentPage) - 1);
 
@@ -14,17 +14,17 @@ const allBooks = async (req, res) => {
     let countSQL = "SELECT COUNT(*) AS total_num FROM books";
     let values = [];
 
-    if(categoryId && news){
+    if(category_id && news){
         sql += " WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
         countSQL += " WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
-        values = [categoryId];
-    } else if (categoryId){
+        values = [category_id];
+    } else if (category_id){
         sql += " WHERE category_id = ?";
         countSQL += " WHERE category_id = ?";
-        values = [categoryId];
+        values = [category_id];
     } else if(news){
         sql += " WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
-        countSQL += sql += " WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
+        countSQL += " WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
     }
 
     sql += " LIMIT ? OFFSET ?";
